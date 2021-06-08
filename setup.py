@@ -12,6 +12,13 @@ setup(name='pyzmqcollectives',
       author='Christopher Taylor',
       author_email='ct.clmsn@gmail.com',
       license='Boost',
+      classifiers=[
+          "Programming Language :: Python :: 3",
+          "License :: OSI Approved :: Boost License",
+          "Operating System :: OS Independent",
+          "Topic :: System :: Distributed Computing",
+          "Topic :: Scientific/Engineering",
+      ],
       packages=['pyzmqcollectives'],
       install_requires=[
           'zmq',
