@@ -71,10 +71,10 @@ environment variables when jobs are submitted.
 It is the author's opinion that 0MQ is has a simple and fairly pervasive
 install base (several Free/Open Source software products use 0MQ under the
 hood). Several environments the author has worked in lack MPI (OpenMPI,
-MPICH, etc) installations or installing an MPI implementation is not
-feasible for a variety of reasons. If you are a person that needs SPMD
-programming and all the options you want or need are not available then
-this library is for you.
+MPICH, etc) installations and/or installing an MPI implementation is not
+feasible for a variety of reasons. If you are a person that works in a
+'Python Shop', needs SPMD programming, and all the options you want or
+need are not available then this library is for you.
 
 ## How many processs/nodes should I deploy?
 
