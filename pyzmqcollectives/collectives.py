@@ -28,7 +28,7 @@ class BasicTcpBackend(object):
         self.nranks = bparams.nranks 
         self.addresses = bparams.addresses
 
-    def initialize(self, param):
+    def initialize(self):
         return
 
     def finalize(self):
@@ -78,11 +78,23 @@ class Collectives(object):
     def __init__(self, backend):
         self.backend = backend
 
-    def initialize(self, p):
-        self.backend.initialize(p)
+    def initialize(self):
+        self.backend.initialize()
 
     def finalize(self):
         self.backend.finalize()
+
+    def __enter__(self):
+        self.initialize()
+        return self
+
+    def __exit__(self, exc_type, exc_value, tb):
+        if exc_type is not None:
+            traceback.print_exception(exc_type, exc_value, tb)
+            # return False # uncomment to pass exception through
+        self.finalize()
+        return True
+
 
     def broadcast(self, data, root=0):
         print('broadcast')

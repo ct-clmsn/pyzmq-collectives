@@ -56,10 +56,11 @@ if __name__ == "__main__":
     else:
         client()
     '''
+    '''
     be = BasicTcpBackend(p)
 
     c = Collectives(be)
-    c.initialize(p)
+    c.initialize()
 
     v = 0
     if be.rank == 0:
@@ -82,3 +83,28 @@ if __name__ == "__main__":
 
     print(p.rank, v)
     c.finalize()
+    '''
+    be = BasicTcpBackend(p)
+
+    with Collectives(be) as c:
+        v = 0
+        if be.rank == 0:
+            v = 1
+
+        v = c.broadcast(v) #, root=3)
+        print(v)
+        c.barrier()
+        v = c.reduce([1,1,1,1], 0, lambda x, y : x + y)
+        c.barrier()
+        print(v)
+
+        v = c.gather([1,1,1,1])
+        c.barrier()
+        print(v)
+
+        v = c.scatter([1,1,1,1,2,2,2,2])
+        c.barrier()
+        print(v)
+
+        print(p.rank, v)
+ 
