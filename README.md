@@ -29,15 +29,6 @@ Wikipedia has a nice summary about collectives and SPMD programming [here](https
 This library requires the use of environment variables
 to configure distributed runs of SPMD applications.
 
-Users are provided 2 Backend types for Collective operations
-over TCP. The first Backend type is a BasicTcpBackend. The
-BasicTcpBackend does not perform heartbeats to determine if
-a remote process has failed. The second Backend type is
-TcpBackend. The TcpBackend spins up an I/O thread to manage
-data exchanges from the application and a modified implementation
-of Pieter Hintjens ['Paranoid Pirate' heartbeat algorithm](https://www.oreilly.com/library/view/zeromq/9781449334437/). The heartbeat implementation should provide some form of remote
-process fault detection.
-
 Users are required to supply each of the following environment
 variables to correctly run programs:
 
@@ -68,26 +59,6 @@ PYZMQ_COLLECTIVES_NRANKS=2 PYZMQ_COLLECTIVES_RANK=1 PYZMQ_COLLECTIVES_ADDRESSES=
 In this example, Rank 0 maps to 127.0.0.1:5555 and Rank 1
 maps to 127.0.0.1:5556.
 
-TcpBackend users may modify the behavior of the hearbeat
-implementation by changing the following environment
-variables:
-
-* PYZMQ_COLLECTIVES_LIVENESS
-* PYZMQ_COLLECTIVES_INTERVAL
-* PYZMQ_COLLECTIVES_INTERVAL_INIT
-
-PYZMQ_COLLECTIVES_LIVENESS - unsigned integer value defining
-how many times a heartbeat can be missed before failure is
-determined.
-
-PYZMQ_COLLECTIVES_INTERVAL - unsigned integer value defining
-how many milliseconds to wait before communicating a
-heartbeat.
-
-PYZMQ_COLLECTIVES_INTERVAL_INIT - unsigned integer value defining
-the inital number of milliseconds to wait before communicating a
-heartbeat.
-
 HPC batch scheduling systems like [Slurm](https://en.m.wikipedia.org/wiki/Slurm_Workload_Manager),
 [TORQUE](https://en.m.wikipedia.org/wiki/TORQUE), [PBS](https://en.wikipedia.org/wiki/Portable_Batch_System),
 etc. provide mechanisms to automatically define these
@@ -95,12 +66,41 @@ environment variables when jobs are submitted.
 
 ### Implementation Notes
 
+## How many processs/nodes should I deploy?
+
 Users should make sure to deploy distributed jobs with a power of 2,
 or log2(N), instances of an application developed with this library.
+
+## Why use 0MQ tcp protocol?
 
 Currently a TCP/IP backend is implemented. TCP is a chatty protocol (lots of
 network traffic is generated) and will have an adverse impact on performance.
 That said, TCP is highly available and reliable.
+
+## How scalable is it?
+
+In the interest of providing a scalable solution, each time a communication
+operation is invoked, a couple of things happen on the sender and receiver
+side. For the sender: a socket is created, a connection is made, data is
+transferred, a connection is closed, and the socket is closed. For the
+receiver: a socket is created, a port is bound to the socket, data is
+received, the socket unbinds, the socket is closed.
+
+The reasoning for this particular implementation decision has to deal with
+scalability concerns. If a sufficiently large enough number of machines are
+involved with the application, then the program initialization will take a
+non-trivial amount of time - all the machines will need to create N**2
+(where N is the total number of machine) sockets, socket connections, and
+socket handshakes.
+
+Additionally, there is an overhead cost at the operating system level. Each
+socket consumes a file descriptor. Operating system instances are configured
+with a hard upper bound on the number of file descriptors that can be provided
+to all applications running in the operations system. The popularity of using
+file descriptors to manage synchronization (ie: using file descriptors as
+semaphores for asynchronous function completion, etc) has created several
+instances of "file descriptor leaks" or an over consumption of file descriptors
+leading to program and operating system crashes.
 
 ### License
 
