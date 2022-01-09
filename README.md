@@ -66,6 +66,16 @@ environment variables when jobs are submitted.
 
 ### Implementation Notes
 
+## Who is this library for?
+
+It is the author's opinion that 0MQ is has a simple and fairly pervasive
+install base (several Free/Open Source software products use 0MQ under the
+hood). Several environments the author has worked in lack MPI (OpenMPI,
+MPICH, etc) installations or installing an MPI implementation is not
+feasible for a variety of reasons. If you are a person that needs SPMD
+programming and all the options you want or need are not available then
+this library is for you.
+
 ## How many processs/nodes should I deploy?
 
 Users should make sure to deploy distributed jobs with a power of 2,
@@ -101,6 +111,13 @@ file descriptors to manage synchronization (ie: using file descriptors as
 semaphores for asynchronous function completion, etc) has created several
 instances of "file descriptor leaks" or an over consumption of file descriptors
 leading to program and operating system crashes.
+
+The trade off is presented in this implementation. This library consumes 1
+socket every time a communication occurs at the expense and cost of connection
+initialization. Program initialization is faster, the solution is significantly
+more scalable (ie: no need to over-exhaust operating system resources like file
+descriptors), and it creates an incentive to minimize the number of communication
+events (which is what one should always aim to achieve).
 
 ### License
 
