@@ -81,7 +81,7 @@ or need (MPI, etc) are not available then this library is for you.
 
 Do you work in the large scale data analysis or machine learning
 problem space? Do you work with Numpy, Scipy, Scikit-Learn, Pandas,
-Arrow, or database technologies (SQL)?
+Arrow, PySparkling, or database technologies (SQL)?
 
 This library will allow you the ability to write programs using
 the aforementioned group of libraries that operate over a cluster
