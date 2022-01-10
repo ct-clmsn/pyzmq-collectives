@@ -68,13 +68,24 @@ environment variables when jobs are submitted.
 
 ## Who is this library for?
 
-It is the author's opinion that 0MQ is has a simple and fairly pervasive
-install base (several Free/Open Source software products use 0MQ under the
-hood). Several environments the author has worked in lack MPI (OpenMPI,
-MPICH, etc) installations and/or installing an MPI implementation is not
-feasible for a variety of reasons. If you are a person that works in a
-'Python Shop', needs SPMD programming, and all the options you want or
-need are not available then this library is for you.
+Several environments the author has worked in lack MPI (OpenMPI,
+MPICH, etc) installations and/or installing an MPI implementation is
+not feasible for a variety of reasons (admin rules, people problems,
+etc). It is the author's opinion that 0MQ has a simple and fairly
+pervasive enough install base (several Free/Open Source software
+products use 0MQ under the hood). If you are a person that works in
+a 'Python Shop', needs SPMD programming, and all the options you want
+or need (MPI, etc) are not available then this library is for you.
+
+## What do I do with this library?
+
+Do you work in the large scale data analysis or machine learning
+problem space? Do you work with Numpy, Scipy, Scikit-Learn, Pandas,
+Arrow, or database technologies (SQL)?
+
+This library will allow you the ability to write programs using
+the aforementioned group of libraries that operate over a cluster
+of machines.
 
 ## How many processs/nodes should I deploy?
 
@@ -114,9 +125,10 @@ leading to program and operating system crashes.
 
 The trade off is presented in this implementation. This library consumes 1
 socket every time a communication occurs at the expense and cost of connection
-initialization. Program initialization is faster, the solution is significantly
-more scalable (ie: no need to over-exhaust operating system resources like file
-descriptors), and it creates an incentive to minimize the number of communication
+initialization overhead. Program initialization is faster, the solution is
+significantly more scalable (ie: no need to over-exhaust operating system
+resources like file descriptors; note a scalability versus peformance
+trade-off!), and it creates an incentive to minimize the number of communication
 events (which is what one should always aim to achieve).
 
 ### License
