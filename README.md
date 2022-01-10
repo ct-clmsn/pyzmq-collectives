@@ -70,9 +70,9 @@ environment variables when jobs are submitted.
 
 Several environments the author has worked in lack MPI (OpenMPI,
 MPICH, etc) installations and/or installing an MPI implementation is
-not feasible for a variety of reasons (admin rules, people problems,
-etc). It is the author's opinion that 0MQ has a simple and fairly
-pervasive enough install base (several Free/Open Source software
+not feasible for a variety of reasons (admin rules, institutional
+inertia, etc). It is the author's opinion that 0MQ has a simple and
+fairly pervasive enough install base (several Free/Open Source software
 products use 0MQ under the hood). If you are a person that works in
 a 'Python Shop', needs SPMD programming, and all the options you want
 or need (MPI, etc) are not available then this library is for you.
