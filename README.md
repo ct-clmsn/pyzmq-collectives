@@ -42,8 +42,9 @@ be performed by calling send and recv on the Backend object.
 
 ```
 p = Params()
+b = TcpBackend(p)
 
-with Collectives(p) as c:
+with Collectives(b) as c:
     c.barrier()
 ```
 
