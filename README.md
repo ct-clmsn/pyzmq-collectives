@@ -46,7 +46,7 @@ analogous to a user provided thread id. The value must
 be 0 or less than PYZMQ_COLLECTIVES_NRANKS.
 
 PYZMQ_COLLECTIVES_ADDRESSES - should contain a ',' delimited
-list of ip addresses and ports. The list length should be
+list of IP addresses and ports. The list length should be
 equal to the integer value of PYZMQ_COLLECTIVES_NRANKS. An
 example for a 2 rank application name `app` is below:
 
@@ -73,9 +73,10 @@ MPICH, etc) installations and/or installing an MPI implementation is
 not feasible for a variety of reasons (admin rules, institutional
 inertia, etc). It is the author's opinion that 0MQ has a simple and
 fairly pervasive enough install base (several Free/Open Source software
-products use 0MQ under the hood). If you are a person that works in
-a 'Python Shop', needs SPMD programming, and all the options you want
-or need (MPI, etc) are not available then this library is for you.
+products use 0MQ under the hood) that implementing this library should
+be a worthwhile investment. If you are a person that works in a 'Python
+Shop', needs SPMD programming, and all the options you want or need
+(OpenMPI, MPICH, etc) are not available then this library is for you.
 
 ## What do I do with this library?
 
@@ -83,9 +84,50 @@ Do you work in the large scale data analysis or machine learning
 problem space? Do you work with Numpy, Scipy, Scikit-Learn, Pandas,
 Arrow, PySparkling, or database technologies (SQL)?
 
-This library will allow you the ability to write programs using
-the aforementioned group of libraries that operate over a cluster
-of machines.
+This library allows you the ability to write programs using the
+aforementioned libraries using the SPMD programming model to operate
+over a cluster of machines.
+
+## What is SPMD?
+
+SPMD (single-program many data) is a parallel programming style or
+model that conceptualizes a network of computers as a large single
+machine. Multicore processors are a reduced version of this concept.
+Each core on the processor in your machine talks to other cores over
+a network in your processor through memory accesses. SPMD style can
+be used when writing multithreaded programs.
+
+In SPMD programming the cores are actually multicore processors and
+instead of communicating over memory accesses on your proessor, the
+communication occurs over a network. In academic terms the machine
+model or abstraction for this enviornment is called PRAM (parallel
+random access machine).
+
+## Why use this over Dask and friends?
+
+Several popular data analytic or machine learning libraries that offer
+distributed computing features and capabilities are implemented using
+a 'microservices' model. The 'microservices' model means several
+distributed 'follower' processes of a program run in an event loop and
+require talking to a 'leader' in order to make progress on the user's
+program (the leader assigns work to the followers).
+
+In some cases, the followers are blocking or can only do a limited amount
+of work before waiting to communicate with the leader for further
+instruction. This seems like a reasonable approach but it also has the
+side-effect of inducing several points of latency and performance loss; the
+followers are not making progress on the problem as they are blocked on
+the leader to tell them what to do. Additional latency is added into the
+mix when several TCP/IP connections are made between leader and followers
+(and visa versa).
+
+This library implements the SPMD model. All instances of the program are
+running simultaneously (or near simultaneously) on different compute hosts
+and immediately make progress toward solving the problem. The only time
+communication occurs is when information needs to be sent to different
+machines to make progress. There are no leaders and followers because all
+distributed processes know what to do - the instructions are in the program
+the distributed processes are executing.
 
 ## How many processs/nodes should I deploy?
 
@@ -94,9 +136,9 @@ or log2(N), instances of an application developed with this library.
 
 ## Why use 0MQ tcp protocol?
 
-Currently a TCP/IP backend is implemented. TCP is a chatty protocol (lots of
-network traffic is generated) and will have an adverse impact on performance.
-That said, TCP is highly available and reliable.
+Currently a TCP/IP backend is implemented. TCP is a chatty protocol
+(lots of network traffic is generated) and will have an adverse impact
+on performance. That said, TCP is highly available and reliable.
 
 ## How scalable is it?
 
@@ -130,6 +172,12 @@ significantly more scalable (ie: no need to over-exhaust operating system
 resources like file descriptors; note a scalability versus peformance
 trade-off!), and it creates an incentive to minimize the number of communication
 events (which is what one should always aim to achieve).
+
+## Limitations?
+
+Currently all binomial communication is implemented with rank 0 as the root
+of the binomial tree. Future improvements will allow users to pick which rank
+serves as root.
 
 ### License
 
