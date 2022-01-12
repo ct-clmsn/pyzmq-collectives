@@ -69,14 +69,17 @@ environment variables when jobs are submitted.
 ## Who is this library for?
 
 Several environments the author has worked in lack MPI (OpenMPI,
-MPICH, etc) installations and/or installing an MPI implementation is
-not feasible for a variety of reasons (admin rules, institutional
-inertia, etc). It is the author's opinion that 0MQ has a simple and
-fairly pervasive enough install base (several Free/Open Source software
-products use 0MQ under the hood) that implementing this library should
-be a worthwhile investment. If you are a person that works in a 'Python
-Shop', needs SPMD programming, and all the options you want or need
-(OpenMPI, MPICH, etc) are not available then this library is for you.
+MPICH, etc) installations and/or installing an MPI implementation
+is not feasible for a variety of reasons (admin rules, institutional
+inertia, compilers are ancient, etc). It is the author's opinion
+that 0MQ has a simple and fairly pervasive enough install base
+(several Free/Open Source software products use 0MQ under the hood)
+and has enough support from the GNU/Linux distribution vendor space
+that finding or getting 0MQ is highly likely. That presumption means
+implementing this library is a worthwhile investment. If you are a
+person that works in a 'Python Shop', needs SPMD programming, and all
+the options you want or need (OpenMPI, MPICH, etc) are not available
+then this library is for you.
 
 ## What do I do with this library?
 
@@ -85,8 +88,8 @@ problem space? Do you work with Numpy, Scipy, Scikit-Learn, Pandas,
 Arrow, PySparkling, or database technologies (SQL)?
 
 This library allows you the ability to write programs using the
-aforementioned libraries using the SPMD programming model to operate
-over a cluster of machines.
+aforementioned libraries using the SPMD programming model to program
+a cluster of machines.
 
 ## What is SPMD?
 
