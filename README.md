@@ -154,7 +154,7 @@ received, the socket unbinds, the socket is closed.
 
 The reasoning for this particular implementation decision has to deal with
 scalability concerns. If a sufficiently large enough number of machines are
-involved with the application, then the program initialization will take a
+involved with the application, then program initialization will take a
 non-trivial amount of time - all the machines will need to create N**2
 (where N is the total number of machine) sockets, socket connections, and
 socket handshakes.
@@ -162,7 +162,7 @@ socket handshakes.
 Additionally, there is an overhead cost at the operating system level. Each
 socket consumes a file descriptor. Operating system instances are configured
 with a hard upper bound on the number of file descriptors that can be provided
-to all applications running in the operations system. The popularity of using
+to all applications running in the operating system. The popularity of using
 file descriptors to manage synchronization (ie: using file descriptors as
 semaphores for asynchronous function completion, etc) has created several
 instances of "file descriptor leaks" or an over consumption of file descriptors
@@ -174,7 +174,8 @@ initialization overhead. Program initialization is faster, the solution is
 significantly more scalable (ie: no need to over-exhaust operating system
 resources like file descriptors; note a scalability versus peformance
 trade-off!), and it creates an incentive to minimize the number of communication
-events (which is what one should always aim to achieve).
+events (communication means waiting longer for a solution and more opportunities
+for program failure).
 
 ## Limitations?
 
