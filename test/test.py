@@ -49,13 +49,19 @@ def server():
         socket.send_string("World from %s" % port)
 
 if __name__ == "__main__":
-    p = BasicParams()
+    # test 0MQ
     '''
     if p.rank == 0:
         server()
     else:
         client()
     '''
+
+    # test different ways
+    # of invoking collectives
+    #
+    p = Params()
+
     '''
     be = BasicTcpBackend(p)
 
@@ -84,7 +90,6 @@ if __name__ == "__main__":
     print(p.rank, v)
     c.finalize()
     '''
-    #be = BasicTcpBackend(p)
     be = TcpBackend(p)
 
     with Collectives(be) as c:
@@ -94,15 +99,14 @@ if __name__ == "__main__":
 
         v = c.broadcast(v) #, root=3)
         print(v)
-        #c.barrier()
+        c.barrier()
         v = c.reduce([1,1,1,1], 0, lambda x, y : x + y)
         v = c.reduce([1,1,1,1], 0, lambda x, y : x + y)
         v = c.reduce([1,1,1,1], 0, lambda x, y : x + y)
         print(v, 'barrier')
-        #c.barrier()
+        c.barrier()
         print(v, 'barrier')
 
-        '''
         v = c.gather([1,1,1,1])
         c.barrier()
         print(v)
@@ -112,5 +116,3 @@ if __name__ == "__main__":
         print(v)
 
         print(p.rank, v)
-        '''
- 

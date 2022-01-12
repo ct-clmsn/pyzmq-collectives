@@ -11,7 +11,7 @@ Binomial Tree) in Python using [PyZMQ](https://github.com/zeromq/pyzmq). The lib
 algorithmic performance for each collective operation over N compute hosts.
 
 Collective communication algorithms are used in HPC (high performance computing) / Supercomputing
-libraries and runtime systems such as [MPI](https://www.open-mpi.org) and [OpenSHMEM](http://openshmem.org).
+libraries and runtime systems such as [OpenMPI](https://www.open-mpi.org) and [OpenSHMEM](http://openshmem.org).
 
 Documentation for this library can be found on it's [wiki](https://github.com/ct-clmsn/pyzmq-collectives/wiki).
 Wikipedia has a nice summary about collectives and SPMD programming [here](https://en.wikipedia.org/wiki/Collective_operation).
@@ -26,7 +26,26 @@ Wikipedia has a nice summary about collectives and SPMD programming [here](https
 
 ### Installing
 
-`./setup.py install --user`
+```
+./setup.py install --user
+```
+
+### How to use this library
+
+Users create a 'Params' object. Create a Backend object using the
+'Params' object as an input. Using the 'with' clause, users
+create a collective communication context (providing the Backend
+object as an input) to perform the collective communication pattern.
+
+Point-to-Point/Rank-to-Rank/Process-to-Process) communications can
+be performed by calling send and recv on the Backend object.
+
+```
+p = Params()
+
+with Collectives(p) as c:
+    c.barrier()
+```
 
 ### Configuring Distributed Program Execution
 
@@ -211,4 +230,4 @@ Christopher Taylor
 
 * [pip](https://pypi.org/project/pip/)
 * [pyzmq](https://github.com/zeromq/pyzmq)
-* [python](https://python.org/
+* [python](https://python.org)
