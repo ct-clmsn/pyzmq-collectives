@@ -3,13 +3,31 @@
 #  Distributed under the Boost Software License, Version 1.0. (See accompanying
 #  file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 #
-import os
-import functools
-import pickle
-import json
-from io import StringIO, BytesIO
+import os, traceback, functools, pickle
+
+from io import BytesIO
 from math import ceil, log
+from time import sleep
+from random import uniform
 from zmq import *
+
+class ExpBackoff(object):
+    def __init__(self, retries = 10, backoff_amt = 0.01):
+        self.retries = retries
+        self.retry_count = 0
+        self.backoff_amt = backoff_amt # ms (10 sec)
+
+    def value(self):
+        if self.retry_count == self.retries:
+            return -1
+        else:
+            self.retry_count += 1
+
+        return ( self.backoff_amt * 2 ** self.retry_count + uniform(0, 1) )
+
+    def reset(self):
+        self.retry_count = 0
+
 
 class BasicParams(object):
     def __init__(self):
@@ -47,15 +65,14 @@ class BasicTcpBackend(object):
                     sock.disconnect("tcp://" + self.addresses[rank])
                     sock.connect("tcp://" + self.addresses[rank])
                 else:
-                    sock.disconnect("tcp://" + self.addresses[rank])
-                    sock.close()
                     cont = False 
+
             except Exception as e:
-                print( (str(e),), e ) 
                 sock.disconnect("tcp://" + self.addresses[rank])
                 sock.connect("tcp://" + self.addresses[rank])
                 continue
 
+        sock.disconnect("tcp://" + self.addresses[rank])
         sock.close()
 
     def recv(self, rank):
@@ -68,12 +85,111 @@ class BasicTcpBackend(object):
             val = sock.recv_pyobj()
         except Exception as e:
             print( (str(e),), e )
-            pass
-
+            
         sock.unbind("tcp://" + self.addresses[self.rank]) #.split(':')[1])
         sock.close()
         return val
  
+class TcpBackend(object):
+    def __init__(self, bparams):
+        self.rank = bparams.rank
+        self.nranks = bparams.nranks 
+        self.addresses = bparams.addresses
+
+    def initialize(self):
+        return
+
+    def finalize(self):
+        return
+
+    def send(self, rank, data):
+        ctx = Context.instance()
+        sock = ctx.socket(PAIR)
+        sock.setsockopt(IMMEDIATE, 1)
+        sock.connect("tcp://" + self.addresses[rank])
+        poller = Poller()
+        poller.register(sock, POLLOUT)
+        backoff = ExpBackoff()
+        cont = True
+
+        while cont:
+            try:
+                sock.send_pyobj(data)
+                socks = dict(poller.poll())
+                if sock in socks and socks[sock] == POLLOUT:
+                    cont = False
+                else:
+                    rc = backoff.value()
+                    if rc == -1:
+                        sock.disconnect("tcp://" + self.addresses[rank])
+                        poller.unregister(sock)
+                        sock.close()
+                        raise Exception("Backoff exceeded retry count!")
+                    else:
+                        sleep(rc)
+                continue
+            except Exception as e:
+                print( (str(e),), e )
+                rc = backoff.value()
+                if rc == -1:
+                    sock.disconnect("tcp://" + self.addresses[rank])
+                    poller.unregister(sock)
+                    sock.close()
+                    raise Exception("Backoff exceeded retry count!")
+                else:
+                    sleep(rc)
+
+                sock.connect("tcp://" + self.addresses[rank])
+                continue
+
+        poller.unregister(sock)
+        sock.disconnect("tcp://" + self.addresses[rank])
+        sock.close()
+
+    def recv(self, rank):
+        ctx = Context.instance()
+        sock = ctx.socket(PAIR)
+        sock.bind("tcp://" + self.addresses[self.rank]) #.split(':')[1])
+        poller = Poller()
+        poller.register(sock, POLLIN)
+        backoff = ExpBackoff()
+        val = None
+        cont = True
+
+        while cont:
+            try:
+                socks = dict(poller.poll())
+                if sock in socks and socks[sock] == POLLIN:
+                    val = sock.recv_pyobj()
+                    cont = False
+                else:
+                    rc = backoff.value()
+                    if rc == -1:
+                        cont = False
+                        sock.unbind("tcp://" + self.addresses[self.rank]) #.split(':')[1])
+                        poller.unregister(sock)
+                        sock.close()
+                        raise Exception("Backoff exceeded retry count!")
+                    else:
+                        sleep(rc)
+            except Exception as e:
+                print( (str(e),), e )
+                rc = backoff.value()
+                if rc == -1:
+                    sock.unbind("tcp://" + self.addresses[self.rank]) #.split(':')[1])
+                    poller.unregister(sock)
+                    sock.close()
+                else:
+                    sleep(rc)
+
+                sock.connect("tcp://" + self.addresses[rank])
+                continue
+           
+        poller.unregister(sock)
+        sock.unbind("tcp://" + self.addresses[self.rank]) #.split(':')[1])
+        sock.close()
+        return val
+
 class Collectives(object):
     def __init__(self, backend):
         self.backend = backend
@@ -97,24 +213,20 @@ class Collectives(object):
 
 
     def broadcast(self, data, root=0):
-        print('broadcast')
         rank_n = self.backend.nranks
         logp = (int)(ceil(log(self.backend.nranks)/log(2.)))
         k = rank_n // 2
         notrecv = True
         if root > 0:
             rank_me = ((self.backend.nranks-self.backend.rank) + root) % self.backend.nranks
-            print('rankme', rank_me, self.backend.rank, root)
         else:
             rank_me = self.backend.rank
 
         for i in range(logp):
             twok = 2 * k
             if (rank_me % twok) == 0:
-                print('xmt', rank_me, rank_me+k)
                 self.backend.send(rank_me+k, data)
             elif notrecv and ((rank_me % twok) == k):
-                print('rcv', rank_me, rank_me-k)
                 data = self.backend.recv(rank_me-k)
                 notrecv = False
             k >>= 1
@@ -122,7 +234,6 @@ class Collectives(object):
         return data
 
     def reduce(self, data, init, fn, root=0):
-        print('reduce')
         rank_n = self.backend.nranks
         logp = (int)(ceil(log(self.backend.nranks)/log(2.)))
         mask = 0x1
@@ -136,10 +247,8 @@ class Collectives(object):
         for i in range(logp):
             if (mask & rank_me) == 0:
                 src = rank_me | mask
-                print('src', src)
                 if (src < rank_n) and not_sent:
                     data = self.backend.recv(src)
-                    print(type(data))
                     local_result = fn(local_result, data)
             elif not_sent:
                 parent = rank_me & (~mask)
@@ -151,12 +260,10 @@ class Collectives(object):
         return local_result
 
     def barrier(self):
-        print('barrier')
         v = self.reduce([0,], 0, lambda x, y: x + y)
         v = self.broadcast(v)
 
     def gather(self, data, root=0):
-        print('gather')
         rank_n = self.backend.nranks
         logp = (int)(ceil(log(self.backend.nranks)/log(2.)))
         rank_me = self.backend.rank
@@ -201,7 +308,6 @@ class Collectives(object):
         return ret
 
     def scatter(self, data, root=0):
-        print('scatter')
         rank_n = self.backend.nranks
         logp = (int)(ceil(log(self.backend.nranks)/log(2.)))
         rank_me = self.backend.rank
