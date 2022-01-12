@@ -188,7 +188,7 @@ The reasoning for this particular implementation decision has to deal with
 scalability concerns. If a sufficiently large enough number of machines are
 applied to execute an application, then program initialization will take a
 non-trivial amount of time - all the machines will need to create N**2
-(where N is the total number of machine) sockets, socket connections, and
+(where N is the total number of machines) sockets, socket connections, and
 socket handshakes.
 
 Additionally, there is an overhead cost at the operating system level. Each
