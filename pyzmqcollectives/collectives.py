@@ -90,11 +90,18 @@ class BasicTcpBackend(object):
         sock.close()
         return val
  
+class Params(BasicParams):
+    def __init__(self, poll_itvl=1, backoff_retries=10, backoff_amt=0.01):
+        BasicParams.__init__(self)
+
 class TcpBackend(object):
     def __init__(self, bparams):
         self.rank = bparams.rank
         self.nranks = bparams.nranks 
         self.addresses = bparams.addresses
+        self.poll_itvl = poll_itvl
+        self.backoff_retries = backoff_retries
+        self.backoff_amt
 
     def initialize(self):
         return
@@ -109,7 +116,7 @@ class TcpBackend(object):
         sock.connect("tcp://" + self.addresses[rank])
         poller = Poller()
         poller.register(sock, POLLOUT)
-        backoff = ExpBackoff()
+        backoff = ExpBackoff(retries=self.backoff_retries, backoff_amt=self.backoff_amt)
         cont = True
 
         while cont:
@@ -152,7 +159,7 @@ class TcpBackend(object):
         sock.bind("tcp://" + self.addresses[self.rank]) #.split(':')[1])
         poller = Poller()
         poller.register(sock, POLLIN)
-        backoff = ExpBackoff()
+        backoff = ExpBackoff(retries=self.backoff_retries, backoff_amt=self.backoff_amt)
         val = None
         cont = True
 
