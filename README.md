@@ -24,6 +24,10 @@ Wikipedia has a nice summary about collectives and SPMD programming [here](https
 * [Gather](https://en.wikipedia.org/wiki/Collective_operation#Gather_[8])
 * [Barrier](https://en.wikipedia.org/wiki/Barrier_(computer_science))
 
+### Installing
+
+`./setup.py install --user`
+
 ### Configuring Distributed Program Execution
 
 This library requires the use of environment variables
@@ -85,7 +89,7 @@ then this library is for you.
 
 Do you work in the large scale data analysis or machine learning
 problem space? Do you work with Numpy, Scipy, Scikit-Learn, Pandas,
-Arrow, PySparkling, or database technologies (SQL)?
+Arrow, PySparkling, Gensim, NLTK, or database technologies (SQL)?
 
 This library allows you the ability to write programs using the
 aforementioned libraries using the SPMD programming model to program
@@ -108,7 +112,7 @@ random access machine).
 
 ## Why use this over Dask and friends?
 
-Several popular data analytic or machine learning libraries that offer
+Several common data analytic or machine learning libraries that offer
 distributed computing features and capabilities are implemented using
 a 'microservices' model. The 'microservices' model means several
 distributed 'follower' processes of a program run in an event loop and
@@ -131,6 +135,14 @@ communication occurs is when information needs to be sent to different
 machines to make progress. There are no leaders and followers because all
 distributed processes know what to do - the instructions are in the program
 the distributed processes are executing.
+
+The author's 10+ years experience working data analytics and machine learning
+problems left an impression that regex, numpy, scipy, scikit-learn, and a
+collective communication library are fundamental and necessary tools for
+practicioners. Several of the more commonly used libraries require as much,
+if not more, effort to learn when compared to learning SPMD programming. This
+library fills the collective library niche (when other traditional solutions
+are not available).
 
 ## How many processs/nodes should I deploy?
 
@@ -177,11 +189,15 @@ trade-off!), and it creates an incentive to minimize the number of communication
 events (communication means waiting longer for a solution and more opportunities
 for program failure).
 
-## Limitations?
+## Limitations? Future Support/Features?
 
-Currently all binomial communication is implemented with rank 0 as the root
+* Currently all binomial communication is implemented with rank 0 as the root
 of the binomial tree. Future improvements will allow users to pick which rank
 serves as root.
+* Does not currently provide startup script for local/distributed SPMD program
+execution (consider mpi-run or mpi-exec)
+* Needs to provide users with utility functions that simplify partitioning data
+* Will provide future functionality that makes SPMD programming more approachable.
 
 ### License
 
