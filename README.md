@@ -158,7 +158,7 @@ the distributed processes are executing.
 The author's years of experience working data analytics and machine learning
 problems left an impression that regex, numpy, scipy, scikit-learn, and a
 collective communication library are fundamental and necessary tools for
-practicioners. Several of the more commonly used libraries require as much,
+practitioners. Several of the more commonly used libraries require as much,
 if not more, effort to learn when compared to learning SPMD programming. This
 library fills the collective library niche (when other traditional solutions
 are not available).
