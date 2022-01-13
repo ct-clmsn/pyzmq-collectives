@@ -91,8 +91,11 @@ class BasicTcpBackend(object):
         return val
  
 class Params(BasicParams):
-    def __init__(self, poll_itvl=1, backoff_retries=10, backoff_amt=0.01):
+    def __init__(self, backoff_retries=10, backoff_amt=0.01, poll_itvl=1):
         BasicParams.__init__(self)
+        self.backoff_retries = backoff_retries
+        self.backoff_amt = backoff_amt
+        self.poll_itvl = poll_itvl
 
 class TcpBackend(object):
     def __init__(self, bparams):
