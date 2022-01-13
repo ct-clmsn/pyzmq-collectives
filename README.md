@@ -156,7 +156,7 @@ machines to make progress. There are no leaders and followers because all
 distributed processes know what to do - the instructions are in the program
 the distributed processes are executing.
 
-The author's 10+ years experience working data analytics and machine learning
+The author's years of experience working data analytics and machine learning
 problems left an impression that regex, numpy, scipy, scikit-learn, and a
 collective communication library are fundamental and necessary tools for
 practicioners. Several of the more commonly used libraries require as much,
