@@ -124,11 +124,10 @@ Each core on the processor in your machine talks to other cores over
 a network in your processor through memory accesses. SPMD style can
 be used when writing multithreaded programs.
 
-In SPMD programming the cores are actually multicore processors and
-instead of communicating over memory accesses on your proessor, the
-communication occurs over a network. In academic terms the machine
-model or abstraction for this enviornment is called PRAM (parallel
-random access machine).
+The SPMD programming abstraction means processor cores communicate over
+a network versus memory accesses on your processor's internal
+interconnect. In academic terms, the machine model or abstraction
+for this enviornment is called PRAM (parallel random access machine).
 
 ## Why use this over Dask and friends?
 
