@@ -111,7 +111,7 @@ Do you work in the large scale data analysis or machine learning
 problem space? Do you work with Numpy, Scipy, Scikit-Learn, Pandas,
 Arrow, PySparkling, Gensim, NLTK, or database technologies (SQL)?
 
-This library allows you the ability to write programs using the
+This library allows you the ability to write programs with the
 aforementioned libraries using the SPMD programming model to program
 a cluster of machines.
 
