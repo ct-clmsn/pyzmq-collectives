@@ -119,9 +119,9 @@ of the problems you'd like to solve? If you are a cloud developer
 working on the hadoop file system, this library combines nicely
 with [snakebite](https://github.com/spotify/snakebite), [pywebhdfs](https://github.com/ProjectMeniscus/pywebhdfs), [hdfs3](https://github.com/dask/hdfs3), [pyhdfs](https://github.com/jingw/pyhdfs).
 
-This library allows you the ability to write programs with the
-aforementioned libraries using the SPMD programming style to
-write programs that use a cluster of machines.
+This library allows you the ability to write programs, in the SPMD
+programming style, with the aforementioned libraries, that utilize
+a cluster of machines.
 
 This library combined with the [marshal](https://docs.python.org/3/library/marshal.html) or [dill](https://dill.readthedocs.io/en/latest/dill.html) libraries let's you do weird things
 like [send functions](https://stackoverflow.com/questions/1253528/is-there-an-easy-way-to-pickle-a-python-function-or-otherwise-serialize-its-cod) or [send lambdas](https://stackoverflow.com/questions/25348532/can-python-pickle-lambda-functions) as part of a distributed
