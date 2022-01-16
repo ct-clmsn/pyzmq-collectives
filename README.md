@@ -205,8 +205,8 @@ applied to execute an application, then program initialization will take a
 non-trivial amount of time - all the machines will need to create N**2
 (where N is the total number of machines) sockets, socket connections, and
 socket handshakes. A separate thread/process for communication would be
-required along with fairly complicated queue management (imagine a queue
-built on top of 0MQ) logic.
+required along with fairly complicated queue management logic (imagine a queue
+built on top of 0MQ).
 
 Additionally, there is an overhead cost at the operating system level. Each
 socket consumes a file descriptor. Operating system instances are configured
