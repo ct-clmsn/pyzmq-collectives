@@ -116,8 +116,8 @@ you work with Numpy, Scipy, Scikit-Learn, Pandas, Arrow, PySparkling,
 Gensim, NLTK, PyCUDA, Numba, PyTorch, Theano, Tensorflow, PyOpenCL,
 OpenCV2, or database technologies (SQL) and want to scale the size
 of the problems you'd like to solve? If you are a cloud developer
-working on the hadoop file system, this library combines nicely
-with [snakebite](https://github.com/spotify/snakebite), [pywebhdfs](https://github.com/ProjectMeniscus/pywebhdfs), [hdfs3](https://github.com/dask/hdfs3), [pyhdfs](https://github.com/jingw/pyhdfs).
+working with data stored on the hadoop file system, this library
+combines nicely with [snakebite](https://github.com/spotify/snakebite), [pywebhdfs](https://github.com/ProjectMeniscus/pywebhdfs), [hdfs3](https://github.com/dask/hdfs3), [pyhdfs](https://github.com/jingw/pyhdfs).
 
 This library allows you the ability to write programs, in the SPMD
 programming style, with the aforementioned libraries, that utilize
