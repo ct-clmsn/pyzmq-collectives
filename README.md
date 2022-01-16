@@ -137,7 +137,7 @@ cores over a network in your processor through memory access instructions.
 
 The SPMD programming style re-enforces the notion that processors
 communicate over a network instead of through the internal
-interaconnect. In academic terms, the machine model or
+interconnect. In academic terms, the machine model or
 abstraction for this enviornment is called PRAM (parallel random
 access machine). SPMD style can be used when writing multithreaded
 programs for this library SPMD is being used to program clusters
