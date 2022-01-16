@@ -91,11 +91,10 @@ class BasicTcpBackend(object):
         return val
  
 class Params(BasicParams):
-    def __init__(self, backoff_retries=10, backoff_amt=0.01, poll_itvl=None):
+    def __init__(self, backoff_retries=1000, backoff_amt=0.01):
         BasicParams.__init__(self)
         self.backoff_retries = backoff_retries
         self.backoff_amt = backoff_amt
-        self.poll_itvl = poll_itvl
 
 class TcpBackend(object):
     def __init__(self, params):
@@ -104,7 +103,6 @@ class TcpBackend(object):
         self.addresses = params.addresses
         self.backoff_retries = params.backoff_retries
         self.backoff_amt = params.backoff_amt
-        self.poll_itvl = params.poll_itvl
 
     def initialize(self):
         return
@@ -113,30 +111,32 @@ class TcpBackend(object):
         return
 
     def send(self, rank, data):
-        ctx = Context.instance()
-        sock = ctx.socket(PAIR)
-        sock.setsockopt(IMMEDIATE, 1)
-        sock.connect("tcp://" + self.addresses[rank])
-        poller = Poller()
-        poller.register(sock, POLLOUT)
         backoff = ExpBackoff(retries=self.backoff_retries, backoff_amt=self.backoff_amt)
         cont = True
 
+        ctx = Context.instance()
+        sock = ctx.socket(PUSH)
+        sock.setsockopt(IMMEDIATE, 1)
+        sock.setsockopt(LINGER, -1)
+        sock.setsockopt(DELAY_ATTACH_ON_CONNECT, 1)
+        sock.setsockopt(SNDHWM , 0)
+        sock.connect("tcp://" + self.addresses[rank])
+        poller = Poller()
+        poller.register(sock, POLLOUT)
+
         while cont:
             try:
+                rc = backoff.value()
+                if rc == -1:
+                    poller.unregister(sock)
+                    sock.disconnect("tcp://" + self.addresses[rank])
+                    sock.close()
+                    raise Exception("Backoff exceeded retry count!")
+
                 sock.send_pyobj(data)
-                socks = dict(poller.poll(self.poll_itvl))
+                socks = dict(poller.poll(rc))
                 if sock in socks and socks[sock] == POLLOUT:
                     cont = False
-                else:
-                    rc = backoff.value()
-                    if rc == -1:
-                        poller.unregister(sock)
-                        sock.disconnect("tcp://" + self.addresses[rank])
-                        sock.close()
-                        raise Exception("Backoff exceeded retry count!")
-                    else:
-                        sleep(rc)
                 continue
             except Exception as e:
                 print( (str(e),), e )
@@ -146,8 +146,6 @@ class TcpBackend(object):
                     sock.disconnect("tcp://" + self.addresses[rank])
                     sock.close()
                     raise Exception("Backoff exceeded retry count!")
-                else:
-                    sleep(rc)
 
                 sock.connect("tcp://" + self.addresses[rank])
                 continue
@@ -157,31 +155,32 @@ class TcpBackend(object):
         sock.close()
 
     def recv(self, rank):
-        ctx = Context.instance()
-        sock = ctx.socket(PAIR)
-        sock.bind("tcp://" + self.addresses[self.rank]) #.split(':')[1])
-        poller = Poller()
-        poller.register(sock, POLLIN)
         backoff = ExpBackoff(retries=self.backoff_retries, backoff_amt=self.backoff_amt)
         val = None
         cont = True
 
+        ctx = Context.instance()
+        sock = ctx.socket(PULL)
+        sock.setsockopt(RCVHWM , 0)
+        sock.bind("tcp://" + self.addresses[self.rank]) #.split(':')[1])
+        poller = Poller()
+        poller.register(sock, POLLIN)
+
         while cont:
             try:
-                socks = dict(poller.poll(self.poll_itvl))
+                rc = backoff.value()
+                if rc == -1:
+                    cont = False
+                    poller.unregister(sock)
+                    sock.unbind("tcp://" + self.addresses[self.rank]) #.split(':')[1])
+                    sock.close()
+                    raise Exception("Backoff exceeded retry count!")
+ 
+                socks = dict(poller.poll(rc))
                 if sock in socks and socks[sock] == POLLIN:
                     val = sock.recv_pyobj()
                     cont = False
-                else:
-                    rc = backoff.value()
-                    if rc == -1:
-                        cont = False
-                        poller.unregister(sock)
-                        sock.unbind("tcp://" + self.addresses[self.rank]) #.split(':')[1])
-                        sock.close()
-                        raise Exception("Backoff exceeded retry count!")
-                    else:
-                        sleep(rc)
+                continue
             except Exception as e:
                 print( (str(e),), e )
                 rc = backoff.value()
@@ -189,8 +188,6 @@ class TcpBackend(object):
                     poller.unregister(sock)
                     sock.unbind("tcp://" + self.addresses[self.rank]) #.split(':')[1])
                     sock.close()
-                else:
-                    sleep(rc)
 
                 sock.connect("tcp://" + self.addresses[rank])
                 continue
