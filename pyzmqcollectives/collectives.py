@@ -218,7 +218,6 @@ class Collectives(object):
         self.finalize()
         return True
 
-
     def broadcast(self, data, root=0):
         rank_n = self.backend.nranks
         logp = (int)(ceil(log(self.backend.nranks)/log(2.)))
@@ -359,3 +358,42 @@ class Collectives(object):
             k >>= 1
             rank_n >>= 1
         return ret
+
+    def scan(self, data, init, fn, root=0):
+        '''
+        this implementation performs a reduction (using init
+        and fn), then a modified binomial tree broadcast is
+        performed; the left hand side of the tree recieves
+        the value of init and the right hand side recieves
+        the local value computed by the reduction
+        '''
+        val = self.reduce(data, init, fn, root)
+        xmt_data = [init, val]
+
+        rank_n = self.backend.nranks
+        logp = (int)(ceil(log(self.backend.nranks)/log(2.)))
+        k = rank_n // 2
+        notrecv = True
+        xmt_idx = 1
+ 
+        if root > 0:
+            rank_me = ((self.backend.nranks-self.backend.rank) + root) % self.backend.nranks
+        else:
+            rank_me = self.backend.rank
+
+        for i in range(logp):
+            twok = 2 * k
+            if (rank_me % twok) == 0:
+                self.backend.send(rank_me+k, xmt_data[xmt_idx])
+                if xmt_idx == 1:
+                    xmt_idx = 0
+            elif notrecv and ((rank_me % twok) == k):
+                val = self.backend.recv(rank_me-k)
+                for i in range(len(data)):
+                    data[i] = fn(val, data[i])
+                notrecv = False
+            k >>= 1
+
+        return data
+
+
