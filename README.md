@@ -22,6 +22,7 @@ Wikipedia has a nice summary about collectives and SPMD programming [here](https
 * [Reduction](https://en.wikipedia.org/wiki/Broadcast_(parallel_pattern))
 * [Scatter](https://en.wikipedia.org/wiki/Collective_operation#Scatter_[9])
 * [Gather](https://en.wikipedia.org/wiki/Collective_operation#Gather_[8])
+* [Scan](https://en.wikipedia.org/wiki/Collective_operation#Prefix-Sum/Scan_[6])
 * [Barrier](https://en.wikipedia.org/wiki/Barrier_(computer_science))
 
 ### Installing
